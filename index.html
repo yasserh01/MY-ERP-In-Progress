@@ -160,7 +160,7 @@ input[data-ae]{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www
 </style></head><body>
 <header><h1 id="ttl">ERP System</h1><span class="crumb" id="cr"></span><span class="sp"></span><span id="mcbox" hidden></span>
 <button class="btn" id="back" hidden>← Return</button><button class="btn" id="home" hidden>All modules</button>
-<button class="btn" onclick="fs(-1)">A−</button><button class="btn" onclick="fs(1)">A+</button><button class="btn" id="lo" hidden onclick="logout()">Sign out</button><select id="role" title="Acting as" onchange="db.role=this.value;sv()"></select><button class="btn" onclick="th()">Theme</button></header><div id="mcstrip" hidden></div>
+<button class="btn" id="gdbtn" onclick="gdOpen()" title="Open the ERP User Guide: it opens on the page for the screen you are working on">📖 Guide</button><button class="btn" onclick="fs(-1)">A−</button><button class="btn" onclick="fs(1)">A+</button><button class="btn" id="lo" hidden onclick="logout()">Sign out</button><select id="role" title="Acting as" onchange="db.role=this.value;sv()"></select><button class="btn" onclick="th()">Theme</button></header><div id="mcstrip" hidden></div>
 <main id="m"></main><dialog id="dg"></dialog>
 <script>
 /* ===== in-page dialogs: the hosted viewer never shows alert/confirm/prompt ===== */
@@ -22832,6 +22832,45 @@ h=h.replace(/<\/div><\/div>\s*<div class="ecr-kp">/,(ol?`<br>${ecrC(ecrP('On lea
 const hv_fsv=fsv;
 fsv=function(){const r=hv_fsv.apply(this,arguments);try{document.querySelectorAll('#m button[onclick^="fsPrint("]').forEach(b=>{const m=/fsPrint\('([^']+)'\)/.exec(b.getAttribute('onclick'));if(!m)return;const x=document.createElement('button');x.className='btn';x.textContent='Exit form';x.title='Final Settlement & Exit Clearance form (A4)';x.setAttribute('onclick',`hvExitFs('${m[1]}')`);b.after(x);b.after(document.createTextNode(' '))})}catch(x){}return r};
 function hvExitFs(id){const r=rows('fs').find(x=>x.id==id);if(!r)return;const e=emp(r.emp||(r.in&&r.in.emp));if(!e){alert('The employee of this settlement was not found.');return}hvExitForm(e.Code)}
+
+/* ====== v81 · USER GUIDE · the 📖 Guide button in the top bar opens the bundled manual (guide/index.html) full-screen, on the page for the screen the user is working on ====== */
+(function(){const s=document.createElement('style');s.id='gdcss';s.textContent=`
+#gdd{position:fixed;inset:0;width:100%;height:100vh;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;border-radius:0;background:var(--bg);overflow:hidden}
+#gdd[open]{display:flex;flex-direction:column}
+#gdd .gdh{display:flex;align-items:center;gap:8px;flex:none;padding:6px 14px;padding-top:max(6px,env(safe-area-inset-top,0px));background:var(--card);border-bottom:1px solid var(--line);overflow-x:auto;white-space:nowrap}
+#gdd .gdh b{margin-right:6px}
+#gdd .gdh .sp{flex:1;min-width:4px}
+#gdd a.btn{text-decoration:none;color:var(--ink);display:inline-block}
+#gdd .gdb{flex:1;min-height:0;position:relative;background:var(--bg)}
+#gdd iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+#gdd .gdm{padding:28px;max-width:560px;margin:auto}
+@media(max-width:560px){#gdd .gdh{padding-inline:8px;gap:6px}#gdd .gdh b{display:none}#gdd .gdh .gdl{display:none}}
+`;document.head.appendChild(s)})();
+
+const GDU='guide/index.html',GDM={in:'inv'},GDA=new Set('md-companies md-branches md-departments md-designations md-costcenters md-coa md-taxcodes md-currencies md-units md-payterms pj-projects pj-costtypes md-costel pj-wbs pj-boq pj-cws pj-cwg pj-cwm pj-ipc pj-cwo pj-budgets pj-pcosts pj-commit pj-cwe pj-cwx pj-pjclose pj-milestones pj-cwd pj-pcc pj-jcb pj-cwr pj-bver pj-pclose md-suppliers pu-pr pu-rfq pu-quotes pu-bids pu-lpo pu-grn pu-sinv pu-match pu-pcn pu-sret md-customers sa-sq sa-so sa-dn sa-sinvc sa-cn sa-sr sa-rc sa-pcert sa-vo sa-rrun sa-cntr sa-pdc sa-ecl sa-bdw sa-unbilled sa-cage sa-srec md-items md-services md-categories md-stores in-ivrn in-ivs in-opening in-rec in-iss in-cons in-trf in-adj in-cnt in-nrv in-ivro in-ivd in-ivr in-stkv fa-assets fa-asstype md-vehcat fa-fas fa-acq fa-atrf fa-dep fa-disp fa-areg fa-fam fa-adocs md-employees hr-psett hr-ppc hr-shift hr-hcal md-paycat md-empexp hr-hlt hr-hlc hr-pfk hr-pfc hr-pfb hr-pfs hr-rnt hr-rns hr-rws hr-mpar hr-ts hr-add hr-ded hr-smv hr-run hr-ppay hr-loan hr-lreg hr-rjn hr-als hr-eosb hr-fset hr-padj hr-hlr hr-hlex hr-hrfm hr-pfg hr-pfa hr-pfl hr-pfp hr-pfo hr-rnq hr-rnc hr-rno hr-rnb hr-rnk hr-rwd hr-vmr hr-edr hr-ipm hr-exn hr-pcl hr-pdash hr-rpts hr-adjr hr-smr hr-lbal hr-loanr hr-loanx md-empr hr-ecs hr-ecr hr-prv hr-psl hr-hlrg hr-hlxr hr-hlpa hr-pfr1 hr-pfr2 hr-pfr3 hr-pfr4 hr-pfr5 hr-rnr1 hr-rnr2 hr-rnr3 hr-rnr4 hr-rnr5 hr-rwr1 hr-rwr2 hr-rwr3 hr-rwr4 legal-cct legal-ccs legal-ccg legal-ccd legal-ccr1 legal-ccr2 legal-ccr3 grp-gset grp-grc grp-gme grp-gix grp-gsp grp-gus grp-gst grp-gadj grp-gdash grp-gcmp grp-gpos grp-gtp grp-gctb grp-gpl grp-gbs grp-gelm fi-fxr md-banks md-cashboxes md-pholders fi-brs fi-periods fi-accmap fi-antpl fi-jv fi-pv fi-gpv fi-grv fi-gvc fi-petty fi-bt fi-bstmt fi-bankrec fi-brh fi-lc fi-lg fi-pdcm fi-odf fi-bln fi-tdp fi-accr fi-prepay fi-lease fi-prov fi-fxrev fi-ic fi-icr fi-bud fi-icv fi-vatr fi-ctax fi-fstm fi-gl fi-tb fi-bva fi-bdgr fi-brr1 fi-brr2 fi-brr3 fi-bpos fi-gvrep fi-soa fi-aging fi-grnp fi-regs fi-anrep fi-leaser fi-prepayr sy-users sy-roles sy-rperm sy-uacc sy-numset sy-appr sy-company sy-mcmode sy-rules sy-eclset sy-bkp sy-audit'.split(' '));
+/* the guide page for the screen the user is on: the screen itself, else its module, else the welcome page */
+function gdId(){const[,m,k]=location.hash.slice(1).split('/');if(!m)return'home';if(k&&GDA.has(m+'-'+k))return m+'-'+k;return GDM[m]||m}
+function gdDark(){return getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()=='#171e21'}
+function gdFrame(){return document.querySelector('#gdb iframe')}
+function gdOpen(){
+ let d=$('gdd');
+ if(!d){d=document.createElement('dialog');d.id='gdd';d.setAttribute('aria-label','ERP User Guide');
+  d.innerHTML=`<div class="gdh"><b>📖 ERP User Guide</b><button class="btn" onclick="gdGo('home')">🏠 Guide home</button><button class="btn" id="gdhere" onclick="gdGo()" title="Open the guide page for the screen you were working on">📍 This screen</button><span class="sp"></span><a class="btn" id="gdnt" target="_blank" rel="noopener" href="${GDU}" title="Open the guide in its own browser tab">↗<span class="gdl"> New tab</span></a><button class="btn" onclick="gdClose()">✕<span class="gdl"> Close</span></button></div><div class="gdb" id="gdb"></div>`;
+  d.addEventListener('close',()=>{const b=$('gdb');if(b)b.innerHTML=''});   /* the frame is removed when the guide is closed */
+  document.body.appendChild(d)}
+ const id=gdId(),b=$('gdb'),f=document.createElement('iframe');
+ $('gdhere').hidden=id=='home';$('gdnt').href=GDU+'#'+id;
+ b.innerHTML='';f.title='ERP User Guide';f.src=GDU+'#'+id;f.onload=()=>gdReady(f);b.appendChild(f);
+ if(!d.open)d.showModal()}
+function gdReady(f){let w,d;try{w=f.contentWindow;d=w.document;d.getElementById}catch(e){d=null}
+ if(!d)return;   /* the frame cannot be inspected: leave it as loaded */
+ if(!d.getElementById('home')){const b=$('gdb');if(b)b.innerHTML='<div class="gdm"><h2>The guide is not available here</h2><p class="sub">The guide files (guide/index.html and its pictures) were not found next to this copy of the ERP. Open the ERP from its published link, or ask your administrator for the latest version.</p></div>';return}
+ try{d.documentElement.dataset.theme=gdDark()?'dark':'light'}catch(e){}   /* same colour theme as the ERP */
+ try{w.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const r=d.getElementById('res'),sd=d.getElementById('side');if(d.querySelector('.lb')||(r&&!r.hidden)||(sd&&sd.classList.contains('open')))return;gdClose()},true)}catch(e){}
+ try{w.history.pushState=function(st,t,u){return w.history.replaceState(st,t,u)}}catch(e){}   /* the guide's own links then replace instead of adding history entries */
+ try{w.focus()}catch(e){}}
+function gdGo(id){const f=gdFrame();if(!f)return;id=id||gdId();const u=GDU+'#'+id;$('gdnt').href=u;try{f.contentWindow.location.replace(new URL(u,document.baseURI).href)}catch(e){f.src=u}}   /* replace, so the guide never adds entries to the browser's Back history */
+function gdClose(){const d=$('gdd');if(d&&d.open)d.close()}
 
 MC.init();addEventListener('hashchange',render);render();
 </script></body></html>
